@@ -9,14 +9,17 @@ from mavsdk.telemetry import FlightMode
 import haversine
 import numpy as np
 
+NORTH_EAST_CORNER = (49.57069804930975, 11.030361860205034)
+NORTH_WEST_CORNER = (49.57058365455419, 11.030150838986174)
+SOUTH_EAST_CORNER = (49.57057898537339, 11.030527456713145)
+SOUTH_WEST_CORNER = (49.57046342304837, 11.030320035396016)
+
 def get_abs_distance(position1, position2):
     return haversine.haversine(position1[0:2], position2[0:2], unit=haversine.Unit.METERS)
 
 async def takeoff(uav, takeoff_altitude=2.0, vertical_uncertainity=0.2):
-    # Arm and takeoff
     accepted = await uav.arm_and_takeoff(takeoff_altitude=takeoff_altitude)
 
-    # Wait for UAV to reach takeoff altitude
     while accepted:
         await asyncio.sleep(0.1)
         altitude = uav.get_position()[2]
@@ -26,10 +29,8 @@ async def takeoff(uav, takeoff_altitude=2.0, vertical_uncertainity=0.2):
             break
 
 async def fly_to_position(uav, goal_position, relative_altitude=2.0, horizontal_uncertainity=1.0):
-    # Fly to position
     accepted = await uav.send_goal_position(goal_position[0], goal_position[1], relative_altitude)
-    
-    # Wait for UAV to reach position
+
     while accepted:
         await asyncio.sleep(0.1)
         current_position = uav.get_position()
