@@ -49,6 +49,9 @@ lidar_lib.get_ranging_data.restype = ctypes.c_int
 lidar_lib.getSpads.argtypes = [ctypes.c_void_p, ctypes.c_int]
 lidar_lib.getSpads.restype = ctypes.c_int
 
+lidar_lib.calibrate_glass.argtypes = [ctypes.c_void_p]
+lidar_lib.calibrate_glass.restype = ctypes.c_int
+
 class LidarSensor:
     def __init__(self):
        
@@ -93,4 +96,7 @@ class LidarSensor:
     
     def get_spads_of_zone(self, zone: int) -> int:
         return lidar_lib.getSpads(self._c_ptr, zone)
+    
+    def calibrate_glass(self, distance_mm: int, reflectance_percent: int) -> int:
+        return lidar_lib.calibrate_glass(self._c_ptr, distance_mm, reflectance_percent)
     
