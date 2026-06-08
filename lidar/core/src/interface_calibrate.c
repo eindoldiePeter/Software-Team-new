@@ -11,6 +11,7 @@
 #define INTEGRATION_TIME 20
 #define MAX_UINT16 65535
 #define SAMPLES 10
+#define CALIBRATION_AFTER_FRAMES 50
 
 
 void sleep_ms(int ms)
@@ -78,6 +79,9 @@ int calibrate(VL53L8CX_calibrate *calib)
     status = vl53l8cx_set_target_order(&calib->conf, STRONGEST);
     failure(status, "Failed to set target order");
 
+    status = vl53l8cx_set_VHV_repeat_count(&calib->conf, CALIBRATION_AFTER_FRAMES);
+    failure(status, "Failed to set temperature calibration repeat count");
+
     status = vl53l8cx_start_ranging(&calib->conf);
     failure(status, "Failed to start ranging");
 
@@ -104,17 +108,41 @@ uint8_t calibrate_glass( VL53L8CX_calibrate *calib, uint16_t distance_mm, uint16
 int get_ranging_data(VL53L8CX_calibrate *calib)
 {
     int status = 0;
-    int min = 0;
-    int value = 0;
+    int16_t value = 0;
+    uint8_t j = 10;
+    uint8_t valid = 0;
+
+    if(calib->calibrated != 1){
+        calibrate(calib);
+    }
     do{
-        min = INT32_MAX;
-        status = vl53l8cx_get_ranging_data(&calib->conf, &calib->results);
-        for(int i = 0; i < 64; i++){
-            value = calib->results.distance_mm[i];
-            min = MIN(min, value);
+        status = vl53l8cx_check_data_ready(&calib->conf, &calib->data_is_ready);
+        if(status != 0){
+            j --;
+            if(j<1){
+                failure(status, "Data not ready after waiting");
+                return status;
+            }
+
+            continue;
         }
+        j = 20;
+        status = vl53l8cx_get_ranging_data(&calib->conf, &calib->results);
+        valid = 1;
+        for(int i = 0; i < 64; i++){
+            if(calib->results.target_status[i] == 0 || calib->results.target_status[i] == 255){
+                valid = 0;
+                break;
+            }
+            value = calib->results.distance_mm[i];
+            if(value < 0){
+                valid = 0;
+                break;
+            }
+        }
+
         sleep_ms(10);
-    }while(min < 1);
+    }while(!valid && j > 1);
 
     return status;
 }
@@ -256,6 +284,13 @@ bool checkMaterial(VL53L8CX_calibrate *calib, int spad_threshold){
     else{
         return false;
     }
+}
+
+int set_sharpener(VL53L8CX_calibrate *calib, uint8_t sharpener_percent){
+    if(calib->calibrated != 1){
+        calibrate(calib);
+    }
+    return vl53l8cx_set_sharpener(calib->conf, sharpener_percent);
 }
 
 int main(void){
