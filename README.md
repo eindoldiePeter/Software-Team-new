@@ -15,10 +15,9 @@ Die Architektur besteht aus zwei Hauptteilen:
   - UAV-Logik, Tests, Simulationen und Tools
 
 ---
-
 # Projektstruktur
 
-
+```text
 .
 ├── lidar/
 │   └── core/
