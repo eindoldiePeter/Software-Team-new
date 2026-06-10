@@ -49,7 +49,7 @@ lidar_lib.get_ranging_data.restype = ctypes.c_int
 lidar_lib.getSpads.argtypes = [ctypes.c_void_p, ctypes.c_int]
 lidar_lib.getSpads.restype = ctypes.c_int
 
-lidar_lib.calibrate_glass.argtypes = [ctypes.c_void_p]
+lidar_lib.calibrate_glass.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
 lidar_lib.calibrate_glass.restype = ctypes.c_int
 
 lidar_lib.set_sharpener.argtypes = [ctypes.c_void_p, ctypes.c_int]
