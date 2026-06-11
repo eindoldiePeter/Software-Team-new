@@ -3,6 +3,8 @@ import numpy as np
 from mechsys_uav import UAV
 import haversine
 import sys
+from servo_controller import Servo
+from servo_controller import Scanner
 from pathlib import Path
 
 
@@ -12,8 +14,10 @@ sys.path.append(str(BASE_DIR))
 from lidar_interface.wrapper import LidarSensor
 
 # in meters
-FLIGHT_ALTITUDE = 5.0
+FLIGHT_ALTITUDE = 2.0
 POSITION_TOLERANCE = 0.5
+
+MARKER_DETECTION_THRESHOLD = 0
 
 GRID_SIZE = 4
 

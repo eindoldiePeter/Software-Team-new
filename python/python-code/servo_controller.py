@@ -1,5 +1,8 @@
 import time
+import pigpio
 
+YAW_PIN = 12
+PITCH_PIN = 13
 
 def angle_to_pwm_us(angle_deg: float) -> int:
     """
@@ -17,8 +20,8 @@ def angle_to_pwm_us(angle_deg: float) -> int:
 
 
 class Servo:
-    def __init__(self, pi, pin):
-        self.pi = pi
+    def __init__(self, pin):
+        self.pi = pigpio.pi()
         self.pin = pin
 
     def set_angle(self, angle_deg: float):
@@ -27,9 +30,9 @@ class Servo:
 
 
 class Scanner:
-    def __init__(self, pi, yaw_pin, pitch_pin):
-        self.yaw = Servo(pi, yaw_pin)
-        self.pitch = Servo(pi, pitch_pin)
+    def __init__(self):
+        self.yaw = Servo(YAW_PIN)
+        self.pitch = Servo(PITCH_PIN)
 
     def _serpentine_sweep(self, yaw_values, pitch_values, dwell_s=0.5):
         # Scan from upper rows to lower rows
@@ -47,8 +50,7 @@ class Scanner:
     def coarse_scan(self):
         self._serpentine_sweep([-90, 0, 90], [-90, -45, 0])
 
-    def fine_scan(self):
-        pass
 
     def scan(self):
         self.coarse_scan()
+        
